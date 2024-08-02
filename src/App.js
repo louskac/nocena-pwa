@@ -1,24 +1,50 @@
-import logo from './logo.svg';
-import './App.css';
+// src/App.js
+
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import AppLayout from './components/AppLayout';
 
 function App() {
+  const [user, setUser] = useState(null);
+  const [showLogin, setShowLogin] = useState(true);
+
+  const showRegisterPage = () => {
+    setShowLogin(false);
+  };
+
+  const showLoginPage = () => {
+    setShowLogin(true);
+  };
+
+  const handleLogin = (userData) => {
+    setUser(userData);
+  };
+
+  const handleRegister = (userData) => {
+    setUser(userData);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setShowLogin(true);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Routes>
+        {user ? (
+          <Route path="/*" element={<AppLayout user={user} handleLogout={handleLogout} />} />
+        ) : (
+          <>
+            <Route path="/login" element={<LoginPage showRegisterPage={showRegisterPage} handleLogin={handleLogin} />} />
+            <Route path="/register" element={<RegisterPage showLoginPage={showLoginPage} handleRegister={handleRegister} />} />
+            <Route path="/*" element={<LoginPage showRegisterPage={showRegisterPage} handleLogin={handleLogin} />} />
+          </>
+        )}
+      </Routes>
+    </Router>
   );
 }
 

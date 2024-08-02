@@ -1,3 +1,8 @@
+@import './assets/fonts/fonts.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -10,4 +15,28 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+.font-font-primary{
+  font-family: 'Montserrat Alt 1';
+}
+
+.navbar-top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: #0A141D;
+  z-index: 1000;
+}
+
+.navbar-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #0A141D;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-around;
 }
