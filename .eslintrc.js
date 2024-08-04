@@ -24,5 +24,6 @@ module.exports = {
   globals: {
     BigInt: 'readonly',
     SharedArrayBuffer: 'readonly',
+    PublicKey: "readonly"
   },
 };
