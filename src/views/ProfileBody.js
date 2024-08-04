@@ -10,7 +10,7 @@ const ProfileBody = ({ user, walletAddress }) => {
     if (walletAddress) {
       const fetchTokenBalance = async () => {
         try {
-          const balance = await getTokenBalance(walletAddress, 'GbhNCbJMD7WndKTyE4fcgQqKeprvDPUVM2NpLiv1Ya8Y'); // Replace with your token mint address
+          const balance = await getTokenBalance(walletAddress, 'ENzvUvbTVoyRXxEya33jhTNqqou8mot5os2WNh7ptVPW'); // Replace with your token mint address
           setTokenBalance(balance);
         } catch (error) {
           console.error('Error fetching token balance:', error);
