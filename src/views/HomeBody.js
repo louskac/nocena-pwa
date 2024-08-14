@@ -90,7 +90,7 @@ const HomeBody = () => {
   };
 
   const completeChallenge = (challengeType) => {
-    navigate('/completing', { state: { challengeType } });
+    navigate('/completing', { state: { challengeType, reward: rewardMapping[challengeType] } });
   };
 
   const currentChallenge = getCurrentDayChallenge();
@@ -100,22 +100,13 @@ const HomeBody = () => {
   return (
     <div className="bg-[#0A141D] text-white p-4">
       <div className="flex justify-center mb-6">
-        <span
-          className="cursor-pointer mx-4"
-          onClick={() => setSelectedTab('daily')}
-        >
+        <span className="cursor-pointer mx-4" onClick={() => setSelectedTab('daily')}>
           <ThematicText text="Daily" isActive={selectedTab === 'daily'} />
         </span>
-        <span
-          className="cursor-pointer mx-4"
-          onClick={() => setSelectedTab('weekly')}
-        >
+        <span className="cursor-pointer mx-4" onClick={() => setSelectedTab('weekly')}>
           <ThematicText text="Weekly" isActive={selectedTab === 'weekly'} />
         </span>
-        <span
-          className="cursor-pointer mx-4"
-          onClick={() => setSelectedTab('monthly')}
-        >
+        <span className="cursor-pointer mx-4" onClick={() => setSelectedTab('monthly')}>
           <ThematicText text="Monthly" isActive={selectedTab === 'monthly'} />
         </span>
       </div>

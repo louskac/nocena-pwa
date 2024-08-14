@@ -19,6 +19,7 @@ code {
 
 .font-font-primary{
   font-family: 'Montserrat Alt 1';
+  text-transform: uppercase;
 }
 
 .navbar-top {

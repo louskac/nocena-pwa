@@ -5,7 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import PrimaryButton from '../widgets/PrimaryButton';
 import logo from '../assets/logo/logo.png';
-import { generateKeypair } from '../utils/Solana';
+import { Keypair, PublicKey } from '@solana/web3.js';
+import { generateKeypair, storeUserInfo, hashPassword, getUserInfo } from '../utils/Solana';
 
 const RoundedInput = styled.input`
   border-radius: 20px;
@@ -21,26 +22,34 @@ const RegisterPage = ({ handleRegister }) => {
 
   const handleRegisterClick = async () => {
     setLoading(true);
-    try {
-      // Generate a new keypair for the user
-      const keypair = generateKeypair();
-      console.log('Generated Keypair:', keypair);
+    const newAccount = Keypair.generate();
 
-      // Store user data in localStorage
+    try {
       const userData = {
         username,
         email,
-        password,
-        publicKey: keypair.publicKey.toString(),
-        secretKey: keypair.secretKey.toString(),
+        passwordHash: hashPassword(password),
+        walletAddress: newAccount.publicKey.toString(),
+        profilePictureUrl: '',
+        additionalData: '',
+        bio: 'No bio yet',
+        dailyChallenges: Array(365).fill(0),
+        weeklyChallenges: Array(52).fill(0),
+        monthlyChallenge: Array(12).fill(0)
       };
+  
+      // Save user data on the blockchain
+      await storeUserInfo(username, email, userData.passwordHash, userData.walletAddress, userData.profilePictureUrl, userData.additionalData, userData.bio, newAccount);
+  
       localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('walletAddress', newAccount.publicKey.toString());
 
       console.log('Storing user data in localStorage...');
       console.log(userData);
 
       setLoading(false);
       handleRegister(userData);
+      navigate('/profile'); // Redirect to profile after registration
     } catch (e) {
       console.log('Error during registration:', e);
       setLoading(false);
@@ -57,7 +66,7 @@ const RegisterPage = ({ handleRegister }) => {
         <div className="text-center mb-4">
           <img src={logo} alt="Logo" className="max-w-full h-auto mx-auto" />
         </div>
-        <form>
+        <div>
           <div className="mb-3">
             <label htmlFor="formUsername" className="block mb-1">
               Username
@@ -110,7 +119,7 @@ const RegisterPage = ({ handleRegister }) => {
               Login
             </a>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

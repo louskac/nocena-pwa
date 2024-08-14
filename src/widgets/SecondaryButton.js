@@ -4,10 +4,9 @@ import React from 'react';
 import styled from 'styled-components';
 
 const ButtonContainer = styled.div`
-  width: 100%; // Make it take full width
+  width: 100%;
   height: 45px;
-  border-radius: 15px; // More rounded corners
-  background: linear-gradient(90deg, #10CAFF 0%, #FD4EF5 100%);
+  border-radius: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -16,8 +15,8 @@ const ButtonContainer = styled.div`
 const StyledButton = styled.button`
   width: 100%;
   height: 100%;
-  border: none;
-  border-radius: 15px; // More rounded corners
+  border: solid;
+  border-radius: 15px;
   background: transparent;
   color: white;
   font-size: 16px;
@@ -29,11 +28,11 @@ const StyledButton = styled.button`
   justify-content: center;
 
   &:focus {
-    outline: none;
+    outline: white solid 1px;
   }
 `;
 
-const PrimaryButton = ({ text, onPressed }) => {
+const SecondaryButton = ({ text, onPressed }) => {
   return (
     <ButtonContainer>
       <StyledButton onClick={onPressed} className='px-8'>
@@ -43,4 +42,4 @@ const PrimaryButton = ({ text, onPressed }) => {
   );
 };
 
-export default PrimaryButton;
+export default SecondaryButton;

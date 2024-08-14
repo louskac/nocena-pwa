@@ -36,5 +36,10 @@ module.exports = {
     contentBase: path.join(__dirname, 'dist'),
     compress: true,
     port: 9000,
-  }
+  },
+  plugins: [
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+    }),
+  ],
 };

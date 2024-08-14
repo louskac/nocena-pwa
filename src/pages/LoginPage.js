@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import PrimaryButton from '../widgets/PrimaryButton';
 import logo from '../assets/logo/logo.png';
-import solanaLogo from '../assets/solana.png';
+import { getUserInfo, comparePassword } from '../utils/Solana';
 
 const RoundedInput = styled.input`
   border-radius: 20px;
@@ -19,19 +19,25 @@ const LoginPage = ({ handleLogin }) => {
 
   const navigate = useNavigate();
 
-  const handleSignIn = async () => {
+  const handleSignIn = async (e) => {
+    e.preventDefault();  // Prevent the default form submission behavior
     setLoading(true);
+    console.log('SignIn initiated...');
     try {
-      const storedUser = JSON.parse(localStorage.getItem('user'));
-      if (storedUser) {
-        const isValidUser =
-          (storedUser.username === identifier || storedUser.email === identifier) &&
-          storedUser.password === password;
+      // Fetch user data from the blockchain
+      console.log("indetifier " + identifier);
+      const storedUser = await getUserInfo(identifier);
+      console.log('Stored userdsfsad:', storedUser);
 
-        if (isValidUser) {
+      if (storedUser) {
+        const isValidPassword = comparePassword(password, storedUser.passwordHash);
+
+        if (isValidPassword) {
           handleLogin(storedUser);
+          console.log('Login successful, navigating to home...');
+          navigate('/home');  // Redirect to profile page after login
         } else {
-          console.log('Invalid username/email or password');
+          console.log('Invalid password');
           setShowForgotPassword(true);
         }
       } else {
@@ -46,10 +52,6 @@ const LoginPage = ({ handleLogin }) => {
     }
   };
 
-  const handleConnectWithSolana = async () => {
-    console.log('Connect with Solana');
-  };
-
   const handleShowRegisterPage = () => {
     navigate('/register');
   };
@@ -60,7 +62,7 @@ const LoginPage = ({ handleLogin }) => {
         <div className="text-center mb-4">
           <img src={logo} alt="Logo" className="max-w-full h-auto mx-auto" />
         </div>
-        <form>
+        <form onSubmit={handleSignIn}>
           <div className="mb-3">
             <label htmlFor="formIdentifier" className="block mb-1">
               Username or Email
@@ -91,7 +93,7 @@ const LoginPage = ({ handleLogin }) => {
 
           {showForgotPassword && (
             <div className="text-right mb-3">
-              <a href="/forgot-password" className="text-blue-400">
+              <a href="/forgot-password" className="text-primary-blue">
                 Forgot password?
               </a>
             </div>
@@ -106,16 +108,6 @@ const LoginPage = ({ handleLogin }) => {
             <a href="#" onClick={handleShowRegisterPage} className="text-primary-blue">
               Sign up
             </a>
-          </div>
-
-          <div className="text-center">
-            <p>For a truly Web3 experience log in with Solana</p>
-            <img
-              src={solanaLogo}
-              alt="Solana Logo"
-              className="cursor-pointer max-w-[90px] h-auto mx-auto"
-              onClick={handleConnectWithSolana}
-            />
           </div>
         </form>
       </div>

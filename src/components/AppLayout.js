@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Route, Routes, useLocation } from 'react-router-dom';
-import { Container, Navbar, Nav } from 'react-bootstrap';
 import HomeBody from '../views/HomeBody';
 import MapBody from '../views/MapBody';
 import ChallengesBody from '../views/ChallengesBody';
@@ -10,6 +9,7 @@ import CompletingBody from '../views/CompletingBody';
 import Menu from './Menu';
 import ThematicIcon from '../widgets/ThematicIcon';
 import ThematicText from '../widgets/ThematicText';
+import OtherProfileBody from '../views/OtherProfileBody';
 
 const AppLayout = ({ user, handleLogout }) => {
   const navigate = useNavigate();
@@ -19,27 +19,23 @@ const AppLayout = ({ user, handleLogout }) => {
   const [walletAddress, setWalletAddress] = useState(null);
 
   useEffect(() => {
-    switch (location.pathname) {
-      case '/home':
-        setCurrentIndex(0);
-        break;
-      case '/map':
-        setCurrentIndex(1);
-        break;
-      case '/challenges':
-        setCurrentIndex(2);
-        break;
-      case '/search':
-        setCurrentIndex(3);
-        break;
-      case '/profile':
-        setCurrentIndex(4);
-        break;
-      case '/completing':
-        setCurrentIndex(5);
-        break;
-      default:
-        setCurrentIndex(0);
+    // Determine the current index based on the path
+    if (location.pathname.startsWith('/home')) {
+      setCurrentIndex(0);
+    } else if (location.pathname.startsWith('/map')) {
+      setCurrentIndex(1);
+    } else if (location.pathname.startsWith('/challenges')) {
+      setCurrentIndex(2);
+    } else if (location.pathname.startsWith('/search')) {
+      setCurrentIndex(3);
+    } else if (location.pathname === '/profile') {
+      setCurrentIndex(4);
+    } else if (location.pathname === '/completing') {
+      setCurrentIndex(5);
+    } else if (location.pathname.startsWith('/profile/')) {
+      setCurrentIndex(6); // New index for OtherProfileBody
+    } else {
+      setCurrentIndex(0);
     }
 
     const storedWalletAddress = localStorage.getItem('walletAddress');
@@ -113,6 +109,8 @@ const AppLayout = ({ user, handleLogout }) => {
         return 'PROFILE';
       case 5:
         return 'COMPLETING CHALLENGE';
+      case 6:
+        return 'USER PROFILE'; // Title for OtherProfileBody
       default:
         return 'HOME';
     }
@@ -140,6 +138,7 @@ const AppLayout = ({ user, handleLogout }) => {
         onClose={handleMenuClose}
         onConnectWallet={handleConnectWallet}
         walletAddress={walletAddress}
+        onLogout={handleLogout}
       />
       <div className="flex-grow mt-12 pt-3">
         <Routes>
@@ -150,6 +149,7 @@ const AppLayout = ({ user, handleLogout }) => {
           <Route path="/profile" element={<ProfileBody user={user} walletAddress={walletAddress} />} />
           <Route path="/completing" element={<CompletingBody />} />
           <Route path="/" element={<HomeBody />} />
+          <Route path="/profile/:walletAddress" element={<OtherProfileBody />} />
         </Routes>
       </div>
       <div className="navbar-bottom fixed bottom-0 left-0 right-0 py-4 flex justify-around bg-primary-bg z-50">

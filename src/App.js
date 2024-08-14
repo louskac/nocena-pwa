@@ -19,7 +19,11 @@ function App() {
   };
 
   const handleLogin = (userData) => {
+    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('walletAddress', userData.walletAddress);
+    localStorage.setItem('publicKey', userData.publicKey);
     setUser(userData);
+    setShowLogin(false);
   };
 
   const handleRegister = (userData) => {
@@ -27,6 +31,9 @@ function App() {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('walletAddress');
+    localStorage.removeItem('publicKey');
     setUser(null);
     setShowLogin(true);
   };
