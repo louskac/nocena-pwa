@@ -23,19 +23,44 @@ const LoginPage = ({ handleLogin }) => {
     e.preventDefault();  // Prevent the default form submission behavior
     setLoading(true);
     console.log('SignIn initiated...');
+    
     try {
       // Fetch user data from the blockchain
-      console.log("indetifier " + identifier);
+      console.log("identifier: " + identifier);
       const storedUser = await getUserInfo(identifier);
-      console.log('Stored userdsfsad:', storedUser);
-
+      console.log('Stored user:', storedUser);
+  
       if (storedUser) {
         const isValidPassword = comparePassword(password, storedUser.passwordHash);
-
+  
         if (isValidPassword) {
-          handleLogin(storedUser);
+          // Ensure all fields from UserInfo are included when storing in localStorage
+          const userData = {
+            username: storedUser.username,
+            email: storedUser.email,
+            passwordHash: storedUser.passwordHash,
+            walletAddress: storedUser.walletAddress,
+            profilePictureUrl: storedUser.profilePictureUrl || '',
+            additionalData: storedUser.additionalData || '',
+            bio: storedUser.bio || 'No bio yet',
+            dailyChallenges: storedUser.dailyChallenges || Array(365).fill(0),
+            weeklyChallenges: storedUser.weeklyChallenges || Array(52).fill(0),
+            monthlyChallenges: storedUser.monthlyChallenges || Array(12).fill(0),
+            public_key: storedUser.public_key || new Uint8Array(32),
+            following: storedUser.following || [],
+            followed_by: storedUser.followed_by || []
+          };
+  
+          // Store the entire user object in localStorage
+          localStorage.setItem('user', JSON.stringify(userData));
+          localStorage.setItem('walletAddress', userData.walletAddress);
+  
+          console.log('User data stored in localStorage:', userData);
+  
+          // Handle successful login
+          handleLogin(userData);
           console.log('Login successful, navigating to home...');
-          navigate('/home');  // Redirect to profile page after login
+          navigate('/home');  // Redirect to home page after login
         } else {
           console.log('Invalid password');
           setShowForgotPassword(true);
@@ -51,7 +76,7 @@ const LoginPage = ({ handleLogin }) => {
       setLoading(false);
     }
   };
-
+  
   const handleShowRegisterPage = () => {
     navigate('/register');
   };

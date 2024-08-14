@@ -23,7 +23,7 @@ const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
 const mainAccount = Keypair.fromSecretKey(senderPrivateKeyBytes);
 
 const TOKEN_PROGRAM_ID = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
-const USER_INFO_PROGRAM_ID = new PublicKey("Ba3mAuynpHoggzUTxeYpAXijcHSWFYRgxTNnLKGa1ahT");
+const USER_INFO_PROGRAM_ID = new PublicKey("6LkspQRnke7w4gnXxGxVzLWDAp9N3FD9i5uY2spCq1Br");
 const TOKEN_MINT = new PublicKey("ENzvUvbTVoyRXxEya33jhTNqqou8mot5os2WNh7ptVPW");
 
 class UserInfo {

@@ -35,25 +35,49 @@ const CompleteChallenge = () => {
   
   const handleFinish = async () => {
     const recipientAddress = localStorage.getItem('walletAddress');
-
+  
     if (!recipientAddress) {
       console.error('Recipient address not found');
       return;
     }
-
+  
     try {
       if (isNaN(reward)) {
         console.error('Invalid reward amount');
         return;
       }
-
+  
+      // Transfer SPL Token as reward
       await transferSplToken(recipientAddress, tokenMintAddress, reward);
       console.log(`Calling Solana function to save data to: ${recipientAddress} for ${challengeType} on index ${challengeIndex}`);
+      
+      // Update challenge data on the blockchain
       await updateChallengeData(recipientAddress, challengeType, challengeIndex);
+  
+      // Retrieve current user data from localStorage
+      const storedUserData = JSON.parse(localStorage.getItem('user'));
+      
+      if (storedUserData) {
+        // Update the relevant challenge array
+        if (challengeType === 'daily') {
+          storedUserData.dailyChallenges[challengeIndex] = 1; // Mark the challenge as completed
+        } else if (challengeType === 'weekly') {
+          storedUserData.weeklyChallenges[challengeIndex] = 1; // Mark the challenge as completed
+        } else if (challengeType === 'monthly') {
+          storedUserData.monthlyChallenges[challengeIndex] = 1; // Mark the challenge as completed
+        }
+  
+        // Save the updated user data back to localStorage
+        localStorage.setItem('user', JSON.stringify(storedUserData));
+  
+        console.log('Updated user data stored in localStorage:', storedUserData);
+      } else {
+        console.error('User data not found in localStorage');
+      }
+  
       navigate('/home');
     } catch (error) {
-      console.error
-      ('Error completing challenge:', error);
+      console.error('Error completing challenge:', error);
     }
   };
 

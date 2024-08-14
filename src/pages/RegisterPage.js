@@ -23,30 +23,49 @@ const RegisterPage = ({ handleRegister }) => {
   const handleRegisterClick = async () => {
     setLoading(true);
     const newAccount = Keypair.generate();
-
+  
     try {
       const userData = {
         username,
         email,
         passwordHash: hashPassword(password),
         walletAddress: newAccount.publicKey.toString(),
-        profilePictureUrl: '',
-        additionalData: '',
-        bio: 'No bio yet',
-        dailyChallenges: Array(365).fill(0),
-        weeklyChallenges: Array(52).fill(0),
-        monthlyChallenge: Array(12).fill(0)
+        profilePictureUrl: '', // Assuming default empty profile picture URL
+        additionalData: '', // Assuming no additional data for now
+        bio: 'No bio yet', // Default bio text
+        dailyChallenges: Array(365).fill(0), // Initializing with zeroes
+        weeklyChallenges: Array(52).fill(0), // Initializing with zeroes
+        monthlyChallenges: Array(12).fill(0), // Corrected from monthlyChallenge to monthlyChallenges
+        public_key: newAccount.publicKey.toBuffer(), // Store the public key as a buffer/byte array
+        following: [], // Empty array as no users are followed initially
+        followed_by: [] // Empty array as no users are following initially
       };
   
       // Save user data on the blockchain
-      await storeUserInfo(username, email, userData.passwordHash, userData.walletAddress, userData.profilePictureUrl, userData.additionalData, userData.bio, newAccount);
+      await storeUserInfo(
+        userData.username, 
+        userData.email, 
+        userData.passwordHash, 
+        userData.walletAddress, 
+        userData.profilePictureUrl, 
+        userData.additionalData, 
+        userData.bio, 
+        userData.dailyChallenges,
+        userData.weeklyChallenges,
+        userData.monthlyChallenges,
+        userData.public_key,
+        userData.following,
+        userData.followed_by,
+        newAccount
+      );
   
+      // Store user data in localStorage
       localStorage.setItem('user', JSON.stringify(userData));
       localStorage.setItem('walletAddress', newAccount.publicKey.toString());
-
+  
       console.log('Storing user data in localStorage...');
       console.log(userData);
-
+  
       setLoading(false);
       handleRegister(userData);
       navigate('/profile'); // Redirect to profile after registration

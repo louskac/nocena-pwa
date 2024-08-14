@@ -65,14 +65,15 @@ const ProfileBody = ({ user, walletAddress }) => {
         </div>
 
         {/* Profile Picture */}
-        <ThematicImage className="relative">
-          <img
-            src={profilePic}
-            alt="Profile"
-            onClick={handleProfilePicClick}
-            className="w-24 h-24 object-cover rounded-full cursor-pointer"
-          />
-        </ThematicImage>
+        <div onClick={handleProfilePicClick}>
+          <ThematicImage className="relative">
+            <img
+              src={profilePic}
+              alt="Profile"
+              className="w-24 h-24 object-cover rounded-full cursor-pointer"
+            />
+          </ThematicImage>
+        </div>
 
         {/* Token Balance */}
         <div className="flex flex-col items-center">
