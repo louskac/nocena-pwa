@@ -79,7 +79,8 @@ export const getAirdrop = async (publicKey, amount) => {
   }
 };
 
-export const storeUserInfo = async (username, email, passwordHash, walletAddress, profilePictureUrl, additionalData, bio, keypair) => {
+export const storeUserInfo = async (username, email, passwordHash, walletAddress, profilePictureUrl, additionalData, bio, dailyChallenges, weeklyChallenges, monthlyChallenge, publicKey, following, followed_by, keypair) => {
+  console.log("store user info");
   const public_key_buffer = keypair.publicKey.toBuffer();
 
   const userInfo = new UserInfo({ 
