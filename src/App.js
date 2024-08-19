@@ -22,6 +22,7 @@ function App() {
     localStorage.setItem('user', JSON.stringify(userData));
     localStorage.setItem('walletAddress', userData.walletAddress);
     localStorage.setItem('publicKey', userData.publicKey);
+    localStorage.setItem('additionalData', userData.additionalData);
     setUser(userData);
     setShowLogin(false);
   };
@@ -34,6 +35,7 @@ function App() {
     localStorage.removeItem('user');
     localStorage.removeItem('walletAddress');
     localStorage.removeItem('publicKey');
+    localStorage.removeItem('additionalData');
     setUser(null);
     setShowLogin(true);
   };

@@ -407,3 +407,44 @@ export const getSearchUsersInfo = async () => {
 
   return users;
 };
+
+export const updateAdditionalData = async (walletAddress, additionalData) => {
+  console.log("updateAdditionalData triggered");
+  try {
+    // Retrieve the current user data
+    const userData = await getUserInfoWallet(walletAddress);
+    console.log(userData);
+    const userPublicKey = new PublicKey(userData.public_key);
+
+    console.log("userPublicKey: " + userPublicKey);
+
+    // Update the additionalData field
+    userData.additionalData = additionalData;
+    console.log("Updated additionalData", userData.additionalData);
+
+    // Serialize the updated user data
+    const updatedDataBuffer = Buffer.from(borsh.serialize(UserInfoSchema, userData));
+    console.log("Serialized updated user data");
+
+    // Create a transaction to update the user data on the blockchain
+    const transaction = new Transaction().add(
+      new TransactionInstruction({
+        keys: [
+          { pubkey: userPublicKey, isSigner: false, isWritable: true },
+        ],
+        programId: USER_INFO_PROGRAM_ID,
+        data: updatedDataBuffer,
+      })
+    );
+
+    console.log('Prepared transaction for updating additionalData');
+    await sendAndConfirmTransaction(connection, transaction, [mainAccount]);
+
+    console.log('additionalData updated successfully');
+    
+    return userData;
+  } catch (error) {
+    console.error('Error updating additionalData:', error);
+    throw error;
+  }
+};

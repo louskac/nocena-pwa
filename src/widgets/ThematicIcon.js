@@ -19,6 +19,9 @@ import profileIconBlue from '../assets/icons/profile-blue.svg';
 import menuIconWhite from '../assets/icons/menu.svg';
 import menuIconPink from '../assets/icons/menu-pink.svg';
 import menuIconBlue from '../assets/icons/menu-blue.svg';
+import penIconWhite from '../assets/icons/pen.svg';
+import penIconPink from '../assets/icons/pen-pink.svg';
+import penIconBlue from '../assets/icons/pen-blue.svg';
 
 const iconMap = {
   home: {
@@ -50,6 +53,11 @@ const iconMap = {
     white: menuIconWhite,
     pink: menuIconPink,
     blue: menuIconBlue,
+  },
+  pen: {
+    white: penIconWhite,
+    pink: penIconPink,
+    blue: penIconBlue,
   },
 };
 

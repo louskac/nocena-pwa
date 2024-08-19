@@ -6,7 +6,9 @@ import styled from 'styled-components';
 import PrimaryButton from '../widgets/PrimaryButton';
 import logo from '../assets/logo/logo.png';
 import { Keypair, PublicKey } from '@solana/web3.js';
-import { generateKeypair, storeUserInfo, hashPassword, getUserInfo } from '../utils/Solana';
+import { storeUserInfo, hashPassword, updateAdditionalData } from '../utils/Solana';
+import { pinataCreateUserData } from '../utils/Pinata';
+
 
 const RoundedInput = styled.input`
   border-radius: 20px;
@@ -31,7 +33,7 @@ const RegisterPage = ({ handleRegister }) => {
         passwordHash: hashPassword(password),
         walletAddress: newAccount.publicKey.toString(),
         profilePictureUrl: '', // Assuming default empty profile picture URL
-        additionalData: '', // Assuming no additional data for now
+        additionalData: 'QmXnSEMQhHPvAFSqYf2Cb2Pz4QSppw94EiVkwi8CZWa1nk', //L: Just a placeholder for later update
         bio: 'No bio yet', // Default bio text
         dailyChallenges: Array(365).fill(0), // Initializing with zeroes
         weeklyChallenges: Array(52).fill(0), // Initializing with zeroes
@@ -67,6 +69,10 @@ const RegisterPage = ({ handleRegister }) => {
       console.log(userData);
   
       setLoading(false);
+      const pinata = await pinataCreateUserData(userData.walletAddress, '', userData.bio, userData.following, userData.followed_by);
+      console.log(pinata);
+      userData.additionalData = pinata;
+      updateAdditionalData(userData.walletAddress, pinata);
       handleRegister(userData);
       navigate('/profile'); // Redirect to profile after registration
     } catch (e) {

@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { getTokenBalance } from '../utils/Solana';
+import { getTokenBalance, updateAdditionalData } from '../utils/Solana';
+import { pinataUpdateUserBio } from '../utils/Pinata';
+
 import nocenixIcon from '../assets/icons/nocenix.ico';
 import defaultProfilePic from '../assets/profile.png';
 import followersIcon from '../assets/icons/followers.svg';
@@ -7,10 +9,15 @@ import ThematicImage from '../widgets/ThematicImage';
 import ChallengeIndicator from '../widgets/ChallengeIndicator';
 import ThematicText from '../widgets/ThematicText';
 import PrimaryButton from '../widgets/PrimaryButton';
+import ThematicIcon from '../widgets/ThematicIcon'; // Importing ThematicIcon
+import saveIcon from '../assets/icons/save.svg'; // Save icon
 
-const ProfileBody = ({ user, walletAddress }) => {
+const ProfileBody = ({ user, walletAddress, updateUserBio }) => {
   const [tokenBalance, setTokenBalance] = useState(0);
   const [profilePic, setProfilePic] = useState(defaultProfilePic);
+  const [isEditingBio, setIsEditingBio] = useState(false);
+  const [bio, setBio] = useState(user.bio || 'No bio available.');
+  const [originalBio, setOriginalBio] = useState(user.bio || 'No bio available.');
   const scrollContainerRef = useRef(null);
 
   useEffect(() => {
@@ -48,6 +55,29 @@ const ProfileBody = ({ user, walletAddress }) => {
     console.log("Upcoming was pressed for: ", walletAddress);
   };
 
+  const handleEditBioClick = () => {
+    console.log('Edit button clicked'); // Debugging statement
+    setIsEditingBio(true);
+  };
+
+  const handleSaveBioClick = async () => {
+    console.log('Save button clicked'); // Debugging statement
+    const pinata = await pinataUpdateUserBio(user.additionalData, bio); // Function to save the updated bio
+    updateAdditionalData(walletAddress, pinata);
+    setIsEditingBio(false);
+    setOriginalBio(bio); // Update the original bio with the new bio
+  };
+
+  const handleBioChange = (event) => {
+    console.log("handleBioChange");
+    setBio(event.target.value);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingBio(false);
+    setBio(originalBio); // Reset the bio to its original state
+  };
+
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
   return (
@@ -66,11 +96,12 @@ const ProfileBody = ({ user, walletAddress }) => {
 
         {/* Profile Picture */}
         <div onClick={handleProfilePicClick}>
-          <ThematicImage className="relative">
+          <ThematicImage className="relative z-10"> {/* Ensure z-index is higher */}
             <img
               src={profilePic}
               alt="Profile"
               className="w-24 h-24 object-cover rounded-full cursor-pointer"
+              style={{ zIndex: 10 }} /* Explicitly set z-index if needed */
             />
           </ThematicImage>
         </div>
@@ -95,8 +126,40 @@ const ProfileBody = ({ user, walletAddress }) => {
       </div>
 
       {/* Bio */}
-      <div className="relative z-10 px-4 text-center text-sm bg-black/40 rounded-md py-2 w-full max-w-xs mt-16">
-        <p>{user.bio || 'No bio available.'}</p> {/* Actual user bio */}
+      <div className={`relative z-10 px-4 text-center text-sm bg-black/40 rounded-md py-2 w-full max-w-xs mt-16 ${isEditingBio ? 'border border-white' : ''}`}>
+        <div className="flex justify-between items-center">
+          {isEditingBio ? (
+            <>
+              <textarea
+                className="w-full p-2 bg-transparent text-white rounded"
+                value={bio}
+                onChange={handleBioChange}
+              />
+              <img
+                src={saveIcon}
+                alt="Save"
+                className="w-6 h-6 ml-2 cursor-pointer"
+                onClick={handleSaveBioClick}
+              />
+              <div onClick={handleCancelEdit} className="ml-4">
+                <ThematicIcon
+                  iconName="pen"
+                  isActive={true}
+                />
+              </div>
+            </>
+          ) : (
+            <p>{bio}</p>
+          )}
+          {!isEditingBio && (
+            <div onClick={handleEditBioClick}>
+              <ThematicIcon
+                iconName="pen"
+                isActive={false}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Timed Challenge Counter */}

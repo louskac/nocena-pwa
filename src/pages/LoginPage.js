@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import PrimaryButton from '../widgets/PrimaryButton';
 import logo from '../assets/logo/logo.png';
 import { getUserInfo, comparePassword } from '../utils/Solana';
+import { fetchUserDataFromPinata } from '../utils/Pinata';
 
 const RoundedInput = styled.input`
   border-radius: 20px;
@@ -34,21 +35,26 @@ const LoginPage = ({ handleLogin }) => {
         const isValidPassword = comparePassword(password, storedUser.passwordHash);
   
         if (isValidPassword) {
+          // Fetch additional data from Pinata using the CID stored in additionalData
+          const pinataCID = storedUser.additionalData;
+          const pinataData = await fetchUserDataFromPinata(pinataCID);
+          console.log(pinataData);
+
           // Ensure all fields from UserInfo are included when storing in localStorage
           const userData = {
             username: storedUser.username,
             email: storedUser.email,
             passwordHash: storedUser.passwordHash,
             walletAddress: storedUser.walletAddress,
-            profilePictureUrl: storedUser.profilePictureUrl || '',
-            additionalData: storedUser.additionalData || '',
-            bio: storedUser.bio || 'No bio yet',
-            dailyChallenges: storedUser.dailyChallenges || Array(365).fill(0),
-            weeklyChallenges: storedUser.weeklyChallenges || Array(52).fill(0),
-            monthlyChallenges: storedUser.monthlyChallenges || Array(12).fill(0),
-            public_key: storedUser.public_key || new Uint8Array(32),
-            following: storedUser.following || [],
-            followed_by: storedUser.followed_by || []
+            profilePictureUrl: pinataData.profileImage || storedUser.profilePictureUrl,
+            additionalData: storedUser.additionalData,
+            bio: pinataData.bio || storedUser.bio,
+            dailyChallenges: storedUser.dailyChallenges,
+            weeklyChallenges: storedUser.weeklyChallenges,
+            monthlyChallenges: storedUser.monthlyChallenges,
+            public_key: storedUser.public_key,
+            following: pinataData.following || storedUser.following,
+            followed_by: pinataData.followed_by || storedUser.followed_by
           };
   
           // Store the entire user object in localStorage
