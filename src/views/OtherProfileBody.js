@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { getUserInfoWallet, getTokenBalance } from '../utils/Solana'; // Adjust the import path as necessary
+import { getUserInfoWallet, getTokenBalance } from '../utils/Solana'; 
+import { fetchUserDataFromPinata } from '../utils/Pinata';
 import defaultProfilePic from '../assets/profile.png';
 import nocenixIcon from '../assets/icons/nocenix.ico';
 import followersIcon from '../assets/icons/followers.svg';
@@ -11,10 +12,12 @@ import PrimaryButton from '../widgets/PrimaryButton';
 import SecondaryButton from '../widgets/SecondaryButton';
 
 const OtherProfileBody = () => {
-  const { walletAddress } = useParams(); // Get walletAddress from URL parameters
+  const { walletAddress } = useParams(); 
   const [userInfo, setUserInfo] = useState(null);
   const [tokenBalance, setTokenBalance] = useState(0);
   const [profilePic, setProfilePic] = useState(defaultProfilePic);
+  const [bio, setBio] = useState('This user has not set a bio.');
+  const [followers, setFollowers] = useState(0);
   const scrollContainerRef = useRef(null);
 
   useEffect(() => {
@@ -22,8 +25,19 @@ const OtherProfileBody = () => {
       try {
         const info = await getUserInfoWallet(walletAddress);
         setUserInfo(info);
-        if (info.profilePictureUrl) {
-          setProfilePic(info.profilePictureUrl);
+
+        if (info.additionalData) {
+          const pinataData = await fetchUserDataFromPinata(info.additionalData);
+
+          if (pinataData.profileImage) {
+            setProfilePic(pinataData.profileImage);
+          }
+          if (pinataData.bio) {
+            setBio(pinataData.bio);
+          }
+          if (pinataData.followers) {
+            setFollowers(pinataData.followers.length);
+          }
         }
 
         const balance = await getTokenBalance(walletAddress, 'ENzvUvbTVoyRXxEya33jhTNqqou8mot5os2WNh7ptVPW');
@@ -70,7 +84,7 @@ const OtherProfileBody = () => {
         {/* Followers Count */}
         <div className="flex flex-col items-center">
           <img src={followersIcon} alt="Followers" className="w-8 h-8 mb-1" />
-          <span>{userInfo.followed_by ? userInfo.followed_by.length : 0}</span> {/* Actual followers count */}
+          <span>{followers}</span> {/* Updated to show followers from Pinata */}
         </div>
 
         {/* Profile Picture */}
@@ -108,7 +122,7 @@ const OtherProfileBody = () => {
 
       {/* Bio */}
       <div className="relative z-10 px-4 text-center text-sm bg-black/40 rounded-md py-2 w-full max-w-xs mt-8">
-        <p>{userInfo.bio || 'This user has not set a bio.'}</p>
+        <p>{bio}</p> {/* Updated to show bio from Pinata */}
       </div>
 
       {/* Timed Challenge Counter */}
@@ -142,4 +156,3 @@ const OtherProfileBody = () => {
 };
 
 export default OtherProfileBody;
-

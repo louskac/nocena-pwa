@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getSearchUsersInfo } from '../utils/Solana';
+import { fetchUserDataFromPinata } from '../utils/Pinata';
 import defaultProfilePic from '../assets/profile.png';
 import ThematicImage from '../widgets/ThematicImage';
 import PrimaryButton from '../widgets/PrimaryButton';
@@ -9,32 +10,55 @@ import nocenixIcon from '../assets/icons/nocenix.ico';
 const SearchBody = () => {
   const [users, setUsers] = useState([]);
   const navigate = useNavigate();
+  const [retryDelay, setRetryDelay] = useState(500); // Initial delay of 500ms
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const cachedUsers = localStorage.getItem('cachedUsers');
-        const cacheTimestamp = localStorage.getItem('cacheTimestamp');
-        const cacheExpiration = 1000 * 60 * 10; // 10 minutes
-        const isCacheValid = cacheTimestamp && (Date.now() - cacheTimestamp < cacheExpiration);
-  
-        if (cachedUsers && isCacheValid) {
-          console.log("Loading users from cache");
-          setUsers(JSON.parse(cachedUsers));
-        } else {
-          console.log("Fetching users from backend");
-          const usersData = await getSearchUsersInfo();
-          console.log("Fetched users data:", usersData);
-          setUsers(usersData);
-          // Store data in localStorage with a timestamp
-          localStorage.setItem('cachedUsers', JSON.stringify(usersData));
-          localStorage.setItem('cacheTimestamp', Date.now());
-        }
-      } catch (error) {
+  const fetchUsers = async (retry = 0) => {
+    try {
+      const cachedUsers = localStorage.getItem('cachedUsers');
+      const cacheTimestamp = localStorage.getItem('cacheTimestamp');
+      const cacheExpiration = 1000 * 60 * 10; // 10 minutes
+      const isCacheValid = cacheTimestamp && (Date.now() - cacheTimestamp < cacheExpiration);
+
+      if (cachedUsers && isCacheValid) {
+        console.log("Loading users from cache");
+        setUsers(JSON.parse(cachedUsers));
+      } else {
+        console.log("Fetching users from backend");
+        const usersData = await getSearchUsersInfo();
+
+        // Fetch additional data (including profile images) from Pinata
+        const usersWithProfileImages = await Promise.all(usersData.map(async (user) => {
+          if (user.additionalData) {
+            try {
+              const pinataData = await fetchUserDataFromPinata(user.additionalData);
+              return { ...user, profilePictureUrl: pinataData.profileImage };
+            } catch (error) {
+              console.error(`Error fetching user data from Pinata for wallet ${user.walletAddress}:`, error);
+              return { ...user, profilePictureUrl: null };
+            }
+          } else {
+            return { ...user, profilePictureUrl: null };
+          }
+        }));
+
+        console.log("Fetched users data with images:", usersWithProfileImages);
+        setUsers(usersWithProfileImages);
+        // Store data in localStorage with a timestamp
+        localStorage.setItem('cachedUsers', JSON.stringify(usersWithProfileImages));
+        localStorage.setItem('cacheTimestamp', Date.now());
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 429) {
+        console.error(`Error 429: Too Many Requests. Retrying after ${retryDelay}ms...`);
+        setTimeout(() => fetchUsers(retry + 1), retryDelay);
+        setRetryDelay(retryDelay * 2); // Exponential backoff
+      } else {
         console.error('Error fetching users:', error);
       }
-    };
-  
+    }
+  };
+
+  useEffect(() => {
     fetchUsers();
   }, []);
 

@@ -52,6 +52,71 @@ export const pinataCreateUserData = async (walletAddress, profileImage, bio, fol
   return result.IpfsHash;
 };
 
+export const pinataUpdateProfileImage = async (pinataCID, file) => {
+  try {
+    // Step 1: Upload the profile image to Pinata
+    const data = new FormData();
+    data.append("file", file);
+
+    const uploadResponse = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${JWT}`,
+        "Cache-Control": "no-cache",
+      },
+      body: data,
+    });
+
+    if (!uploadResponse.ok) {
+      throw new Error(`Failed to upload image to Pinata: ${uploadResponse.statusText}`);
+    }
+
+    const uploadResult = await uploadResponse.json();
+    const profileImageHash = uploadResult.IpfsHash;
+    console.log(`Profile image uploaded successfully:`, profileImageHash);
+
+    // Step 2: Fetch the existing user data from Pinata
+    const userData = await fetchUserDataFromPinata(pinataCID);
+    const oldCID = pinataCID;
+
+    // Step 3: Update the profileImage field with the new IPFS hash
+    userData.profileImage = `https://gateway.pinata.cloud/ipfs/${profileImageHash}`;
+
+    // Step 4: Serialize and upload the updated user data back to Pinata
+    const jsonBlob = new Blob([JSON.stringify(userData)], { type: "application/json" });
+    const updatedFile = new File([jsonBlob], `${pinataCID}.json`);
+
+    const updateData = new FormData();
+    updateData.append("file", updatedFile);
+
+    const updateResponse = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${JWT}`,
+        "Cache-Control": "no-cache",
+      },
+      body: updateData,
+    });
+
+    if (!updateResponse.ok) {
+      console.error(`Error updating profile image for CID ${pinataCID}: ${updateResponse.statusText}`);
+      throw new Error(`HTTP error! status: ${updateResponse.status}`);
+    }
+
+    const updateResult = await updateResponse.json();
+    console.log(`Profile image updated successfully for CID ${pinataCID}:`, updateResult);
+
+    // Step 5: Unpin the old profile image file
+    await unpinOldFile(oldCID);
+
+    return updateResult.IpfsHash; // Return the new IPFS hash of the updated user data
+
+  } catch (error) {
+    console.error('Error updating profile image and user data:', error);
+    throw error;
+  }
+};
+
 export const pinataUpdateUserBio = async (pinataCID, updatedBio) => {
   try {
     // Fetch the existing file from Pinata using the CID

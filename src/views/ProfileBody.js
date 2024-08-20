@@ -1,23 +1,26 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { getTokenBalance, updateAdditionalData } from '../utils/Solana';
-import { pinataUpdateUserBio } from '../utils/Pinata';
+import { pinataUpdateUserBio, pinataUpdateProfileImage  } from '../utils/Pinata';
+import imageCompression from 'browser-image-compression';
 
-import nocenixIcon from '../assets/icons/nocenix.ico';
-import defaultProfilePic from '../assets/profile.png';
-import followersIcon from '../assets/icons/followers.svg';
 import ThematicImage from '../widgets/ThematicImage';
 import ChallengeIndicator from '../widgets/ChallengeIndicator';
 import ThematicText from '../widgets/ThematicText';
 import PrimaryButton from '../widgets/PrimaryButton';
-import ThematicIcon from '../widgets/ThematicIcon'; // Importing ThematicIcon
-import saveIcon from '../assets/icons/save.svg'; // Save icon
+import ThematicIcon from '../widgets/ThematicIcon';
+
+import nocenixIcon from '../assets/icons/nocenix.ico';
+import defaultProfilePic from '../assets/profile.png';
+import followersIcon from '../assets/icons/followers.svg';
+import saveIcon from '../assets/icons/save.svg';
 
 const ProfileBody = ({ user, walletAddress, updateUserBio }) => {
   const [tokenBalance, setTokenBalance] = useState(0);
   const [profilePic, setProfilePic] = useState(defaultProfilePic);
   const [isEditingBio, setIsEditingBio] = useState(false);
-  const [bio, setBio] = useState(user.bio || 'No bio available.');
-  const [originalBio, setOriginalBio] = useState(user.bio || 'No bio available.');
+  const [bio, setBio] = useState(user.bio);
+  const [originalBio, setOriginalBio] = useState(user.bio);
+  const fileInputRef = useRef(null);
   const scrollContainerRef = useRef(null);
 
   useEffect(() => {
@@ -48,7 +51,41 @@ const ProfileBody = ({ user, walletAddress, updateUserBio }) => {
   }, []);
 
   const handleProfilePicClick = () => {
-    console.log('Profile picture clicked!');
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleProfilePicUpload = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      try {
+        // Compress the image
+        const compressedFile = await imageCompression(file, {
+          maxSizeMB: 0.05, // 50KB
+          maxWidthOrHeight: 300, // Adjust based on desired dimensions
+          useWebWorker: true,
+        });
+  
+        // Upload the compressed image
+        const newPinataCID = await pinataUpdateProfileImage(user.additionalData, compressedFile);
+  
+        //L: Update the info on blockchain
+        await updateAdditionalData(walletAddress, newPinataCID);
+        
+        //L: Update the profile picture state and local storage
+        const newProfilePicUrl = `https://gateway.pinata.cloud/ipfs/${newPinataCID}`;
+        setProfilePic(newProfilePicUrl);
+
+        user.additionalData = newPinataCID;
+  
+        // Update the profile picture state
+        setProfilePic(URL.createObjectURL(compressedFile));
+        console.log('Profile image updated successfully');
+      } catch (error) {
+        console.error('Error uploading and compressing profile image:', error);
+      }
+    }
   };
 
   const handleUpcoming = () => {
@@ -61,11 +98,23 @@ const ProfileBody = ({ user, walletAddress, updateUserBio }) => {
   };
 
   const handleSaveBioClick = async () => {
-    console.log('Save button clicked'); // Debugging statement
-    const pinata = await pinataUpdateUserBio(user.additionalData, bio); // Function to save the updated bio
-    updateAdditionalData(walletAddress, pinata);
-    setIsEditingBio(false);
-    setOriginalBio(bio); // Update the original bio with the new bio
+    try {
+      const newPinataCID = await pinataUpdateUserBio(user.additionalData, bio);
+
+      // Update the info on blockchain
+      await updateAdditionalData(walletAddress, newPinataCID);
+
+      // Update the bio state and local storage
+      setIsEditingBio(false);
+      setOriginalBio(bio);
+
+      user.additionalData = newPinataCID;
+      user.bio = bio;
+
+      console.log('Bio updated successfully');
+    } catch (error) {
+      console.error('Error updating bio:', error);
+    }
   };
 
   const handleBioChange = (event) => {
@@ -105,6 +154,15 @@ const ProfileBody = ({ user, walletAddress, updateUserBio }) => {
             />
           </ThematicImage>
         </div>
+
+        {/* Hidden File Input */}
+        <input
+          type="file"
+          accept=".jpg,.jpeg,.png,.webp,.heif,.hevc"
+          ref={fileInputRef}
+          style={{ display: 'none' }}
+          onChange={handleProfilePicUpload}
+        />
 
         {/* Token Balance */}
         <div className="flex flex-col items-center">
