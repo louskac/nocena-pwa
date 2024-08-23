@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import AppLayout from './components/AppLayout';
+import defaultProfilePic from './assets/profile.png';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -19,10 +20,15 @@ function App() {
   };
 
   const handleLogin = (userData) => {
+    // Check if the user has a profile image; if not, use the default image
+    const profileImage = userData.additionalData?.profileImage || defaultProfilePic;
+
     localStorage.setItem('user', JSON.stringify(userData));
     localStorage.setItem('walletAddress', userData.walletAddress);
     localStorage.setItem('publicKey', userData.publicKey);
-    localStorage.setItem('additionalData', userData.additionalData);
+    localStorage.setItem('additionalData', JSON.stringify(userData.additionalData));
+    localStorage.setItem('profileImage', profileImage); // Store the profile image in local storage
+
     setUser(userData);
     setShowLogin(false);
   };

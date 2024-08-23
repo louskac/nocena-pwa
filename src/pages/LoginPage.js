@@ -1,5 +1,3 @@
-// src/pages/LoginPage.js
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -9,7 +7,7 @@ import { getUserInfo, comparePassword } from '../utils/Solana';
 import { fetchUserDataFromPinata } from '../utils/Pinata';
 
 const RoundedInput = styled.input`
-  border-radius: 20px;
+  border-radius: 15px;
 `;
 
 const LoginPage = ({ handleLogin }) => {
@@ -17,72 +15,64 @@ const LoginPage = ({ handleLogin }) => {
   const [password, setPassword] = useState('');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(''); // State to handle errors
 
   const navigate = useNavigate();
 
   const handleSignIn = async (e) => {
-    e.preventDefault();  // Prevent the default form submission behavior
+    e.preventDefault();
     setLoading(true);
-    console.log('SignIn initiated...');
-    
+    setError(''); // Reset error state on new login attempt
+    console.log('ajo')
+  
     try {
-      // Fetch user data from the blockchain
-      console.log("identifier: " + identifier);
       const storedUser = await getUserInfo(identifier);
-      console.log('Stored user:', storedUser);
+      console.log('stored user' + storedUser);
   
-      if (storedUser) {
-        const isValidPassword = comparePassword(password, storedUser.passwordHash);
+      if (!storedUser) {
+        setError('No user found with the provided username or email');
+        setShowForgotPassword(true);
+        return; // Return early to prevent further execution
+      }
   
-        if (isValidPassword) {
-          // Fetch additional data from Pinata using the CID stored in additionalData
-          const pinataCID = storedUser.additionalData;
-          const pinataData = await fetchUserDataFromPinata(pinataCID);
-          console.log(pinataData);
-
-          // Ensure all fields from UserInfo are included when storing in localStorage
-          const userData = {
-            username: storedUser.username,
-            email: storedUser.email,
-            passwordHash: storedUser.passwordHash,
-            walletAddress: storedUser.walletAddress,
-            profilePictureUrl: pinataData.profileImage || storedUser.profilePictureUrl,
-            additionalData: storedUser.additionalData,
-            bio: pinataData.bio || storedUser.bio,
-            dailyChallenges: storedUser.dailyChallenges,
-            weeklyChallenges: storedUser.weeklyChallenges,
-            monthlyChallenges: storedUser.monthlyChallenges,
-            public_key: storedUser.public_key,
-            following: pinataData.following || storedUser.following,
-            followed_by: pinataData.followed_by || storedUser.followed_by
-          };
+      const isValidPassword = comparePassword(password, storedUser.passwordHash);
+      if (isValidPassword) {
+        const pinataCID = storedUser.additionalData;
+        const pinataData = await fetchUserDataFromPinata(pinataCID);
   
-          // Store the entire user object in localStorage
-          localStorage.setItem('user', JSON.stringify(userData));
-          localStorage.setItem('walletAddress', userData.walletAddress);
+        const userData = {
+          username: storedUser.username,
+          email: storedUser.email,
+          passwordHash: storedUser.passwordHash,
+          walletAddress: storedUser.walletAddress,
+          profilePictureUrl: storedUser.profilePictureUrl,
+          additionalData: storedUser.additionalData,
+          bio: pinataData.bio || storedUser.bio,
+          dailyChallenges: storedUser.dailyChallenges,
+          weeklyChallenges: storedUser.weeklyChallenges,
+          monthlyChallenges: storedUser.monthlyChallenges,
+          public_key: storedUser.public_key,
+          following: pinataData.following || storedUser.following,
+          followed_by: pinataData.followed_by || storedUser.followed_by
+        };
   
-          console.log('User data stored in localStorage:', userData);
+        localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem('walletAddress', userData.walletAddress);
   
-          // Handle successful login
-          handleLogin(userData);
-          console.log('Login successful, navigating to home...');
-          navigate('/home');  // Redirect to home page after login
-        } else {
-          console.log('Invalid password');
-          setShowForgotPassword(true);
-        }
+        handleLogin(userData);
+        navigate('/home');
       } else {
-        console.log('No user found');
+        setError('Incorrect password');
         setShowForgotPassword(true);
       }
-      setLoading(false);
     } catch (e) {
-      console.log('Error:', e);
-      setShowForgotPassword(true);
+      console.log('Error during login:', e);
+      setError('User not found');
+    } finally {
       setLoading(false);
     }
   };
-  
+
   const handleShowRegisterPage = () => {
     navigate('/register');
   };
@@ -121,6 +111,8 @@ const LoginPage = ({ handleLogin }) => {
               className="w-full py-2 px-4 bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             />
           </div>
+
+          {error && <p className="text-red-500 text-sm mb-3">{error}</p>} {/* Display error message */}
 
           {showForgotPassword && (
             <div className="text-right mb-3">

@@ -1,16 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getSearchUsersInfo } from '../utils/Solana';
+import { getSearchUsersInfo, getTokenBalance } from '../utils/Solana';
 import { fetchUserDataFromPinata } from '../utils/Pinata';
 import defaultProfilePic from '../assets/profile.png';
 import ThematicImage from '../widgets/ThematicImage';
 import PrimaryButton from '../widgets/PrimaryButton';
+import SecondaryButton from '../widgets/SecondaryButton'; // Assuming you have a SecondaryButton component
 import nocenixIcon from '../assets/icons/nocenix.ico';
 
 const SearchBody = () => {
   const [users, setUsers] = useState([]);
   const navigate = useNavigate();
   const [retryDelay, setRetryDelay] = useState(500); // Initial delay of 500ms
+
+  // Get the logged user's wallet address from local storage
+  const loggedUserWalletAddress = localStorage.getItem('walletAddress');
 
   const fetchUsers = async (retry = 0) => {
     try {
@@ -26,25 +30,42 @@ const SearchBody = () => {
         console.log("Fetching users from backend");
         const usersData = await getSearchUsersInfo();
 
-        // Fetch additional data (including profile images) from Pinata
-        const usersWithProfileImages = await Promise.all(usersData.map(async (user) => {
-          if (user.additionalData) {
-            try {
-              const pinataData = await fetchUserDataFromPinata(user.additionalData);
-              return { ...user, profilePictureUrl: pinataData.profileImage };
-            } catch (error) {
-              console.error(`Error fetching user data from Pinata for wallet ${user.walletAddress}:`, error);
-              return { ...user, profilePictureUrl: null };
-            }
-          } else {
-            return { ...user, profilePictureUrl: null };
+        const usersWithDetails = await Promise.all(usersData.map(async (user) => {
+          try {
+            const tokenBalance = await getTokenBalance(user.walletAddress, 'ENzvUvbTVoyRXxEya33jhTNqqou8mot5os2WNh7ptVPW');
+            const pinataData = await fetchUserDataFromPinata(user.additionalData);
+
+            console.log("image: " + pinataData.profileImage);
+            const profilePictureUrl = pinataData.profileImage;
+
+            const isFollowing = pinataData.following 
+              ? pinataData.following.includes(loggedUserWalletAddress) 
+              : false;
+
+            return {
+              username: user.username,
+              walletAddress: user.walletAddress,
+              tokenBalance: tokenBalance,
+              profilePictureUrl: profilePictureUrl,
+              isFollowing: isFollowing
+            };
+          } catch (error) {
+            console.error(`Error fetching user data for wallet ${user.walletAddress}:`, error);
+            return {
+              username: user.username,
+              additionalData: user.additionalData,
+              walletAddress: user.walletAddress,
+              tokenBalance: 0,
+              profilePictureUrl: defaultProfilePic,
+              isFollowing: false
+            };
           }
         }));
 
-        console.log("Fetched users data with images:", usersWithProfileImages);
-        setUsers(usersWithProfileImages);
+        console.log("Fetched users data with details:", usersWithDetails);
+        setUsers(usersWithDetails);
         // Store data in localStorage with a timestamp
-        localStorage.setItem('cachedUsers', JSON.stringify(usersWithProfileImages));
+        localStorage.setItem('cachedUsers', JSON.stringify(usersWithDetails));
         localStorage.setItem('cacheTimestamp', Date.now());
       }
     } catch (error) {
@@ -67,9 +88,15 @@ const SearchBody = () => {
     navigate(`/profile/${walletAddress}`);
   };
 
-  const handleFollowClick = (e, walletAddress) => {
+  const handleFollowClick = (e, walletAddress, isFollowing) => {
     e.stopPropagation(); // Stop the event from bubbling up to the li element
-    console.log("Following user with wallet address:", walletAddress);
+    if (isFollowing) {
+      console.log("Unfollowing user with wallet address:", walletAddress);
+      // Add logic to unfollow the user
+    } else {
+      console.log("Following user with wallet address:", walletAddress);
+      // Add logic to follow the user
+    }
   };
 
   return (
@@ -77,6 +104,10 @@ const SearchBody = () => {
       <ul>
         {users.map((user, index) => {
           console.log("User data:", user);
+
+          // Hide the button if the user's wallet address matches the logged-in user's wallet address
+          const showFollowButton = user.walletAddress !== loggedUserWalletAddress;
+
           return (
             <li 
               key={index} 
@@ -85,7 +116,7 @@ const SearchBody = () => {
             >
               <ThematicImage className="">
                 <img 
-                  src={user.profilePictureUrl || defaultProfilePic} 
+                  src={user.profilePictureUrl} 
                   alt={`${user.username}'s profile`} 
                   className="w-12 h-12 object-cover rounded-full"
                 />
@@ -97,19 +128,29 @@ const SearchBody = () => {
                   {user.tokenBalance}
                 </div>
               </div>
-              <div 
-                onClick={(e) => {
-                  console.log("Button container clicked");
-                  e.stopPropagation();
-                  handleFollowClick(e, user.walletAddress)
-                }}
-              >
-                <PrimaryButton 
-                  text="Follow" 
-                  className="px-4 py-2" 
-                  onClick={(e) => handleFollowClick(e, user.walletAddress)} 
-                />
-              </div>
+              {showFollowButton && (
+                <div 
+                  onClick={(e) => {
+                    console.log("Button container clicked");
+                    e.stopPropagation();
+                    handleFollowClick(e, user.walletAddress, user.isFollowing)
+                  }}
+                >
+                  {user.isFollowing ? (
+                    <SecondaryButton 
+                      text="Following" 
+                      className="px-4 py-2" 
+                      onClick={(e) => handleFollowClick(e, user.walletAddress, user.isFollowing)} 
+                    />
+                  ) : (
+                    <PrimaryButton 
+                      text="Follow" 
+                      className="px-4 py-2" 
+                      onClick={(e) => handleFollowClick(e, user.walletAddress, user.isFollowing)} 
+                    />
+                  )}
+                </div>
+              )}
             </li>
           );
         })}

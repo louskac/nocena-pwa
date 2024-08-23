@@ -55,7 +55,7 @@ const ChallengeIndicator = ({ dailyChallenges, weeklyChallenges, monthlyChalleng
           r={monthlyRadius}
           cx="70"
           cy="70"
-          fill={monthlyChallenge ? 'white' : 'rgba(255, 255, 255, 0.7)'}
+          fill={monthlyChallenge ? 'white' : 'rgba(255, 255, 255, 0.3)'}
         />
       </svg>
     </div>

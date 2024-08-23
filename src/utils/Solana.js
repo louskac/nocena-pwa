@@ -23,7 +23,7 @@ const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
 const mainAccount = Keypair.fromSecretKey(senderPrivateKeyBytes);
 
 const TOKEN_PROGRAM_ID = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
-const USER_INFO_PROGRAM_ID = new PublicKey("6LkspQRnke7w4gnXxGxVzLWDAp9N3FD9i5uY2spCq1Br");
+const USER_INFO_PROGRAM_ID = new PublicKey("5MfrGABFY387ZSpyag72Hf226FVksUqwTiGM4UjYaxEP");
 const TOKEN_MINT = new PublicKey("ENzvUvbTVoyRXxEya33jhTNqqou8mot5os2WNh7ptVPW");
 
 class UserInfo {
@@ -34,13 +34,10 @@ class UserInfo {
     this.walletAddress = fields.walletAddress || '';
     this.profilePictureUrl = fields.profilePictureUrl || '';
     this.additionalData = fields.additionalData || '';
-    this.bio = fields.bio || ''; // New field for user bio
     this.dailyChallenges = fields.dailyChallenges || Array(365).fill(0); // 365 elements for each day of the year
     this.weeklyChallenges = fields.weeklyChallenges || Array(52).fill(0); // 52 elements for each week of the year
     this.monthlyChallenges = fields.monthlyChallenges || Array(12).fill(0); // 12 elements for each month of the year
     this.public_key = fields.public_key || new Uint8Array(32);
-    this.following = fields.following || []; // Array to store following users
-    this.followed_by = fields.followed_by || []; // Array to store followed by users
   }
 }
 
@@ -54,13 +51,10 @@ const UserInfoSchema = new Map([
       ['walletAddress', 'string'],
       ['profilePictureUrl', 'string'],
       ['additionalData', 'string'],
-      ['bio', 'string'], // New field for user bio
       ['dailyChallenges', ['u8']], // 365 days
       ['weeklyChallenges', ['u8']], // 52 weeks
       ['monthlyChallenges', ['u8']], // 12 months
       ['public_key', [32]], // PublicKey as 32 byte array
-      ['following', ['array', [32]]], // Array of Pubkeys
-      ['followed_by', ['array', [32]]], // Array of Pubkeys
     ],
   }],
 ]);
@@ -79,7 +73,7 @@ export const getAirdrop = async (publicKey, amount) => {
   }
 };
 
-export const storeUserInfo = async (username, email, passwordHash, walletAddress, profilePictureUrl, additionalData, bio, dailyChallenges, weeklyChallenges, monthlyChallenge, publicKey, following, followed_by, keypair) => {
+export const storeUserInfo = async (username, email, passwordHash, walletAddress, profilePictureUrl, additionalData, dailyChallenges, weeklyChallenges, monthlyChallenge, publicKey, keypair) => {
   console.log("store user info");
   const public_key_buffer = keypair.publicKey.toBuffer();
 
@@ -90,13 +84,10 @@ export const storeUserInfo = async (username, email, passwordHash, walletAddress
     walletAddress, 
     profilePictureUrl, 
     additionalData,
-    bio: bio.substring(0, 256),
     dailyChallenges: Array(365).fill(0), // Initialize for a full year
     weeklyChallenges: Array(52).fill(0), // Initialize for a full year
     monthlyChallenges: Array(12).fill(0), // Initialize for a full year
     public_key: public_key_buffer,
-    following: [], // Initialize empty array for following
-    followed_by: [] // Initialize empty array for followed by
   });
 
   const dataBuffer = Buffer.from(borsh.serialize(UserInfoSchema, userInfo));
@@ -145,7 +136,7 @@ export const getUserInfo = async (username) => {
     }
   }
 
-  throw new Error('User info not found');
+  throw new Error('Username not found');
 };
 
 
@@ -295,7 +286,12 @@ export const transferSplToken = async (recipientAddress, tokenMintAddress, amoun
 
     // Create the transaction and add the instruction
     const transaction = new Transaction().add(transferInstruction);
-    transaction.recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
+
+    // Use getLatestBlockhash instead of getRecentBlockhash
+    const { blockhash } = await connection.getLatestBlockhash();
+    transaction.recentBlockhash = blockhash;
+    transaction.feePayer = mainAccount.publicKey;
+
     transaction.sign(mainAccount); // The main account signs the transaction
 
     // Send and confirm the transaction
@@ -396,6 +392,7 @@ export const getSearchUsersInfo = async () => {
 
       users.push({
         username: userInfo.username,
+        additionalData: userInfo.additionalData,
         profilePictureUrl: userInfo.profilePictureUrl,
         walletAddress: userInfo.walletAddress,
         tokenBalance: tokenBalance

@@ -1,5 +1,3 @@
-// src/views/MapBody.js
-
 import React from 'react';
 
 const MapBody = () => {

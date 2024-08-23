@@ -10,6 +10,7 @@ import Menu from './Menu';
 import ThematicIcon from '../widgets/ThematicIcon';
 import ThematicText from '../widgets/ThematicText';
 import OtherProfileBody from '../views/OtherProfileBody';
+import CreateChallengeBody from '../views/CreateChallengeBody';
 
 const AppLayout = ({ user, handleLogout }) => {
   const navigate = useNavigate();
@@ -33,7 +34,9 @@ const AppLayout = ({ user, handleLogout }) => {
     } else if (location.pathname === '/completing') {
       setCurrentIndex(5);
     } else if (location.pathname.startsWith('/profile/')) {
-      setCurrentIndex(6); // New index for OtherProfileBody
+      setCurrentIndex(6);
+    } else if (location.pathname.startsWith('/createchallenge')) {
+        setCurrentIndex(7);
     } else {
       setCurrentIndex(0);
     }
@@ -62,9 +65,6 @@ const AppLayout = ({ user, handleLogout }) => {
         break;
       case 4:
         navigate('/profile');
-        break;
-      case 5:
-        navigate('/completing');
         break;
       default:
         navigate('/home');
@@ -110,7 +110,9 @@ const AppLayout = ({ user, handleLogout }) => {
       case 5:
         return 'COMPLETING CHALLENGE';
       case 6:
-        return 'USER PROFILE'; // Title for OtherProfileBody
+        return 'USER PROFILE';
+      case 7:
+        return 'CREATE CHALLENGE';
       default:
         return 'HOME';
     }
@@ -145,6 +147,7 @@ const AppLayout = ({ user, handleLogout }) => {
           <Route path="/home" element={<HomeBody />} />
           <Route path="/map" element={<MapBody />} />
           <Route path="/challenges" element={<ChallengesBody />} />
+          <Route path="/createchallenge" element={<CreateChallengeBody />} />
           <Route path="/search" element={<SearchBody />} />
           <Route path="/profile" element={<ProfileBody user={user} walletAddress={walletAddress} />} />
           <Route path="/completing" element={<CompletingBody />} />

@@ -15,18 +15,20 @@ export const fetchUserDataFromPinata = async (pinataCID) => {
   }
 };
 
-export const pinataCreateUserData = async (walletAddress, profileImage, bio, following, followers) => {
+export const pinataCreateUserData = async (walletAddress, profileImage, bio, following, followers, challenges, completed_challenges) => {
   const userData = {
     profileImage: profileImage,
     bio: bio,
     following: following,
     followers: followers,
+    challenges: [],
+    completed_challenges: [],
     timestamp: new Date().toISOString(), // Unique timestamp to differentiate each JSON
   };
 
   const jsonBlob = new Blob([JSON.stringify(userData)], { type: "application/json" });
   const file = new File([jsonBlob], `${walletAddress}.json`);
-  
+
   const data = new FormData();
   data.append("file", file);
 
@@ -163,6 +165,64 @@ export const pinataUpdateUserBio = async (pinataCID, updatedBio) => {
   } catch (error) {
     console.error(`Failed to update bio for CID ${pinataCID}:`, error);
   }
+};
+
+export const pinataAddChallenge = async (pinataCID, newChallenge) => {
+  try {
+    // Fetch the existing user data from Pinata using the CID
+    const response = await fetch(`https://gateway.pinata.cloud/ipfs/${pinataCID}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch existing user data');
+    }
+    const userData = await response.json();
+    console.log("Fetched user data:", userData);
+
+    // Ensure that the challenges array exists in the user data
+    if (!userData.challenges) {
+      userData.challenges = [];
+    }
+
+    // Add the new challenge to the challenges array
+    userData.challenges.push(newChallenge);
+
+    // Convert the updated JSON to a Blob (for FormData)
+    const jsonBlob = new Blob([JSON.stringify(userData)], { type: "application/json" });
+    const file = new File([jsonBlob], `${pinataCID}.json`); // Name the file based on the wallet address or CID
+
+    const data = new FormData();
+    data.append("file", file);
+
+    // Upload the updated JSON to Pinata
+    const uploadResponse = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${JWT}`,
+        "Cache-Control": "no-cache",
+      },
+      body: data,
+    });
+
+    if (!uploadResponse.ok) {
+      console.error(`Error updating challenges for CID ${pinataCID}: ${uploadResponse.statusText}`);
+      throw new Error(`HTTP error! status: ${uploadResponse.status}`);
+    }
+
+    const result = await uploadResponse.json();
+    console.log(`Challenge added successfully for CID ${pinataCID}:`, result);
+
+    // Optionally, unpin the old CID to remove the old version of the file from Pinata's storage
+    await unpinOldFile(pinataCID);
+
+    return result.IpfsHash; // Return the new IPFS hash with the updated challenges
+
+  } catch (error) {
+    console.error(`Failed to add challenge for CID ${pinataCID}:`, error);
+    throw error;
+  }
+};
+
+export const pinataFollow = async () => {
+
 };
 
 // Function to unpin the old file (if needed)

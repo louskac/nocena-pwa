@@ -6,7 +6,7 @@ import { transferSplToken, updateChallengeData } from '../utils/Solana';
 const CompleteChallenge = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { challengeType, reward } = location.state || { challengeType: 'daily', reward: 10 };
+  const { challengeType, reward } = location.state || { challengeType: 'daily', reward: 1 };
   const tokenMintAddress = 'ENzvUvbTVoyRXxEya33jhTNqqou8mot5os2WNh7ptVPW';
 
   const getChallengeIndex = () => {

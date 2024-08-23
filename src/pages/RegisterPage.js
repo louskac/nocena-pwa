@@ -32,15 +32,12 @@ const RegisterPage = ({ handleRegister }) => {
         email,
         passwordHash: hashPassword(password),
         walletAddress: newAccount.publicKey.toString(),
-        profilePictureUrl: '', // Assuming default empty profile picture URL
+        profilePictureUrl: 'https://gateway.pinata.cloud/ipfs/QmRdCkhQB6NMDUQ87U1oPjXzcmayfk64xq56rp5xz6uJfV', //L: Default picture
         additionalData: 'QmXnSEMQhHPvAFSqYf2Cb2Pz4QSppw94EiVkwi8CZWa1nk', //L: Just a placeholder for later update
-        bio: 'No bio yet', // Default bio text
         dailyChallenges: Array(365).fill(0), // Initializing with zeroes
         weeklyChallenges: Array(52).fill(0), // Initializing with zeroes
         monthlyChallenges: Array(12).fill(0), // Corrected from monthlyChallenge to monthlyChallenges
         public_key: newAccount.publicKey.toBuffer(), // Store the public key as a buffer/byte array
-        following: [], // Empty array as no users are followed initially
-        followed_by: [] // Empty array as no users are following initially
       };
   
       // Save user data on the blockchain
@@ -51,13 +48,10 @@ const RegisterPage = ({ handleRegister }) => {
         userData.walletAddress, 
         userData.profilePictureUrl, 
         userData.additionalData, 
-        userData.bio, 
         userData.dailyChallenges,
         userData.weeklyChallenges,
         userData.monthlyChallenges,
         userData.public_key,
-        userData.following,
-        userData.followed_by,
         newAccount
       );
   
@@ -69,7 +63,7 @@ const RegisterPage = ({ handleRegister }) => {
       console.log(userData);
   
       setLoading(false);
-      const pinata = await pinataCreateUserData(userData.walletAddress, '', userData.bio, userData.following, userData.followed_by);
+      const pinata = await pinataCreateUserData(userData.walletAddress, 'https://gateway.pinata.cloud/ipfs/QmRdCkhQB6NMDUQ87U1oPjXzcmayfk64xq56rp5xz6uJfV', 'No bio yet', [], [], [], []);
       console.log(pinata);
       userData.additionalData = pinata;
       updateAdditionalData(userData.walletAddress, pinata);

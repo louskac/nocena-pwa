@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getUserInfoWallet, getTokenBalance } from '../utils/Solana'; 
 import { fetchUserDataFromPinata } from '../utils/Pinata';
 import defaultProfilePic from '../assets/profile.png';
@@ -19,6 +19,7 @@ const OtherProfileBody = () => {
   const [bio, setBio] = useState('This user has not set a bio.');
   const [followers, setFollowers] = useState(0);
   const scrollContainerRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -58,7 +59,20 @@ const OtherProfileBody = () => {
     }
   }, [userInfo]);
 
-  const handleChallengeMe = (walletAddress) => {
+  const handleChallengeMe = () => {
+    console.log("profile pic:" + profilePic);
+    navigate('/createchallenge', { 
+      state: { 
+        walletAddress,
+        userInfo,
+        tokenBalance,
+        profilePic: profilePic,
+        bio,
+        followers,
+        username: userInfo.username,
+        challengeType: 'private'  // or 'public', depending on your context
+      }
+    });
     console.log("Challenge me was pressed for: ", walletAddress);
   };
 
