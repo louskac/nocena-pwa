@@ -5,7 +5,7 @@ import styled from 'styled-components';
 
 const ButtonContainer = styled.div`
   width: 100%; // Make it take full width
-  height: 45px;
+  height: 48px;
   border-radius: 15px; // More rounded corners
   background: linear-gradient(90deg, #10CAFF 0%, #FD4EF5 100%);
   display: flex;

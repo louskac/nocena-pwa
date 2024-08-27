@@ -157,11 +157,8 @@ export const pinataUpdateUserBio = async (pinataCID, updatedBio) => {
     const result = await uploadResponse.json();
     console.log(`Bio updated successfully for CID ${pinataCID}:`, result);
 
-    // Optionally, unpin the old CID to remove the old version of the file from Pinata's storage
     await unpinOldFile(pinataCID);
-
     return result.IpfsHash; // Return the new IPFS hash
-
   } catch (error) {
     console.error(`Failed to update bio for CID ${pinataCID}:`, error);
   }
@@ -176,11 +173,6 @@ export const pinataAddChallenge = async (pinataCID, newChallenge) => {
     }
     const userData = await response.json();
     console.log("Fetched user data:", userData);
-
-    // Ensure that the challenges array exists in the user data
-    if (!userData.challenges) {
-      userData.challenges = [];
-    }
 
     // Add the new challenge to the challenges array
     userData.challenges.push(newChallenge);
@@ -210,22 +202,14 @@ export const pinataAddChallenge = async (pinataCID, newChallenge) => {
     const result = await uploadResponse.json();
     console.log(`Challenge added successfully for CID ${pinataCID}:`, result);
 
-    // Optionally, unpin the old CID to remove the old version of the file from Pinata's storage
     await unpinOldFile(pinataCID);
-
     return result.IpfsHash; // Return the new IPFS hash with the updated challenges
-
   } catch (error) {
     console.error(`Failed to add challenge for CID ${pinataCID}:`, error);
     throw error;
   }
 };
 
-export const pinataFollow = async () => {
-
-};
-
-// Function to unpin the old file (if needed)
 const unpinOldFile = async (oldCID) => {
   const unpinResponse = await fetch(`https://api.pinata.cloud/pinning/unpin/${oldCID}`, {
     method: "DELETE",

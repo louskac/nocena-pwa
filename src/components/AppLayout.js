@@ -155,7 +155,7 @@ const AppLayout = ({ user, handleLogout }) => {
           <Route path="/profile/:walletAddress" element={<OtherProfileBody />} />
         </Routes>
       </div>
-      <div className="navbar-bottom fixed bottom-0 left-0 right-0 py-4 flex justify-around bg-primary-bg z-50">
+      <div className="navbar-bottom fixed bottom-0 left-0 right-0 py-4 flex justify-around bg-primary-bg z-50 font-light">
         <button onClick={() => handleNavClick(0)} className="text-center flex-grow text-white">
           <ThematicIcon iconName="home" isActive={currentIndex === 0} />
           <div className="mt-1">Home</div>

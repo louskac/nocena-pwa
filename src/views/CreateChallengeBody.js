@@ -4,7 +4,8 @@ import ThematicImage from '../widgets/ThematicImage';
 import PrimaryButton from '../widgets/PrimaryButton';
 import styled from 'styled-components';
 import defaultProfilePic from '../assets/profile.png';
-import { getTokenBalance } from '../utils/Solana';
+import { getTokenBalance, updateAdditionalData } from '../utils/Solana';
+import { pinataAddChallenge } from '../utils/Pinata';
 
 const RoundedInput = styled.input`
   border-radius: 15px;
@@ -26,8 +27,10 @@ const CreateChallenge = () => {
     username,
     challengeType
   } = location.state || {};
+  console.log("user infojhk", userInfo);
 
   const userWalletAddress = localStorage.getItem('walletAddress');
+  const loggedUsername = localStorage.getItem('username');
   const [price, setPrice] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -76,9 +79,20 @@ const CreateChallenge = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (validateForm()) {
-      console.log('Challenge created:', { challengeType, price, title, description });
+      try{
+        const timestamp = new Date().toISOString();
+        const newChallenge = { challengeType, price, title, description, loggedUsername, timestamp };
+        const newPinataCID = await pinataAddChallenge(userInfo.additionalData, newChallenge);
+        await updateAdditionalData(userInfo.walletAddress, newPinataCID);
+        userInfo.additionalData = newPinataCID;
+        console.log('Challenge created:', { challengeType, price, title, description, loggedUsername, timestamp });
+      }catch (error) {
+        console.error('Error creating the challenge:', error);
+      }
+    }else{
+      console.log('Form invalid');
     }
   };
 
@@ -143,7 +157,6 @@ const CreateChallenge = () => {
             <PrimaryButton
               text={challengeType === 'private' ? 'Challenge me' : 'Create public challenge'}
               className="w-full"
-              onPressed={handleSubmit}
             />
           </div>
         </form>

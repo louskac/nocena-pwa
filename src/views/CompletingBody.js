@@ -1,12 +1,24 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import PrimaryButton from '../widgets/PrimaryButton';
 import { transferSplToken, updateChallengeData } from '../utils/Solana';
+
+import ThematicImage from '../widgets/ThematicImage';
+import PrimaryButton from '../widgets/PrimaryButton';
+import SecondaryButton from '../widgets/SecondaryButton';
+
+import AIProfilePic from '../assets/AI.png';
+import nocenixIcon from '../assets/icons/nocenix.ico';
 
 const CompleteChallenge = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { challengeType, reward } = location.state || { challengeType: 'daily', reward: 1 };
+  const { challengeType, reward, title, description, image } = location.state || { 
+    challengeType: 'daily', 
+    reward: 1, 
+    title: 'Unknown Challenge', 
+    description: 'No description available', 
+    image: AIProfilePic 
+  };
   const tokenMintAddress = 'ENzvUvbTVoyRXxEya33jhTNqqou8mot5os2WNh7ptVPW';
 
   const getChallengeIndex = () => {
@@ -82,10 +94,24 @@ const CompleteChallenge = () => {
   };
 
   return (
-    <div className="bg-[#0A141D] text-white p-4 min-h-screen flex flex-col items-center justify-center">
-      <h2 className="text-2xl mb-4">Challenge Completed!</h2>
-      <p className="mb-6">Congratulations on completing the challenge!</p>
-      <PrimaryButton text="Go Back Home" onPressed={handleFinish} />
+    <div className="bg-[#0A141D] text-white p-4 flex flex-col items-center justify-center">
+      <ThematicImage>
+        <img
+          src={image === 'AI.png' ? AIProfilePic : image}
+          alt="Challenge Image"
+          className="w-24 h-24 object-cover rounded-full cursor-pointer"
+        />
+      </ThematicImage>
+      <div className="flex items-center justify-center mt-8">
+        <img src={nocenixIcon} alt="Nocenix Icon" className="mr-2" width={36} height={36} />
+        <span>{reward}</span>
+      </div>
+      <h2 className="text-2xl my-8 text-center font-font-primary">{title}</h2>
+      <p className="mb-8 text-center">{description}</p>
+      <div className="flex items-center space-x-4 w-full">
+        <SecondaryButton text="Upload file" />
+        <PrimaryButton text="Finish now" onPressed={handleFinish} />
+      </div>
     </div>
   );
 };

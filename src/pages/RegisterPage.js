@@ -58,6 +58,7 @@ const RegisterPage = ({ handleRegister }) => {
       // Store user data in localStorage
       localStorage.setItem('user', JSON.stringify(userData));
       localStorage.setItem('walletAddress', newAccount.publicKey.toString());
+      localStorage.setItem('username', newAccount.username);
   
       console.log('Storing user data in localStorage...');
       console.log(userData);

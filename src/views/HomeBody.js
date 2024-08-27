@@ -89,8 +89,16 @@ const HomeBody = () => {
     return monthlyChallenges[month];
   };
 
-  const completeChallenge = (challengeType) => {
-    navigate('/completing', { state: { challengeType, reward: rewardMapping[challengeType] } });
+  const completeChallenge = (challengeType, title, description) => {
+    navigate('/completing', { 
+      state: { 
+        challengeType, 
+        reward: rewardMapping[challengeType],
+        image: 'AI.png', 
+        title, 
+        description 
+      } 
+    });
   };
 
   const currentChallenge = getCurrentDayChallenge();
@@ -115,7 +123,10 @@ const HomeBody = () => {
         <div className="text-center">
           <h2 className="text-2xl mb-4 font-font-primary">{currentChallenge.title}</h2>
           <p className="mb-6">{currentChallenge.description}</p>
-          <PrimaryButton text="Finish now" onPressed={() => completeChallenge('daily')} />
+          <PrimaryButton 
+            text="Finish now" 
+            onPressed={() => completeChallenge('daily', currentChallenge.title, currentChallenge.description)} 
+          />
           <div className="flex items-center justify-center my-4">
             <img src={nocenixIcon} alt="Nocenix Icon" className="mr-2" width={36} height={36} />
             <span>{rewardMapping[selectedTab]}</span>
@@ -127,7 +138,10 @@ const HomeBody = () => {
         <div className="text-center">
           <h2 className="text-2xl mb-4 font-font-primary">{currentWeekChallenge.title}</h2>
           <p className="mb-6">{currentWeekChallenge.description}</p>
-          <PrimaryButton text="Finish now" onPressed={() => completeChallenge('weekly')} />
+          <PrimaryButton 
+            text="Finish now" 
+            onPressed={() => completeChallenge('weekly', currentWeekChallenge.title, currentWeekChallenge.description)} 
+          />
           <div className="flex items-center justify-center my-4">
             <img src={nocenixIcon} alt="Nocenix Icon" className="mr-2" width={36} height={36} />
             <span>{rewardMapping[selectedTab]}</span>
@@ -139,7 +153,10 @@ const HomeBody = () => {
         <div className="text-center">
           <h2 className="text-2xl mb-4 font-font-primary">{currentMonthChallenge.title}</h2>
           <p className="mb-6">{currentMonthChallenge.description}</p>
-          <PrimaryButton text="Finish now" onPressed={() => completeChallenge('monthly')} />
+          <PrimaryButton 
+            text="Finish now" 
+            onPressed={() => completeChallenge('monthly', currentMonthChallenge.title, currentMonthChallenge.description)} 
+          />
           <div className="flex items-center justify-center my-4">
             <img src={nocenixIcon} alt="Nocenix Icon" className="mr-2" width={36} height={36} />
             <span>{rewardMapping[selectedTab]}</span>

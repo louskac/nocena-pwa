@@ -58,6 +58,7 @@ const LoginPage = ({ handleLogin }) => {
   
         localStorage.setItem('user', JSON.stringify(userData));
         localStorage.setItem('walletAddress', userData.walletAddress);
+        localStorage.setItem('username', userData.username);
   
         handleLogin(userData);
         navigate('/home');

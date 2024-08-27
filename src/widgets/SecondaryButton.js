@@ -5,7 +5,7 @@ import styled from 'styled-components';
 
 const ButtonContainer = styled.div`
   width: 100%;
-  height: 45px;
+  height: 48px;
   border-radius: 15px;
   display: flex;
   align-items: center;
@@ -15,7 +15,7 @@ const ButtonContainer = styled.div`
 const StyledButton = styled.button`
   width: 100%;
   height: 100%;
-  border: solid;
+  border: 0.5px solid;
   border-radius: 15px;
   background: transparent;
   color: white;
@@ -28,7 +28,7 @@ const StyledButton = styled.button`
   justify-content: center;
 
   &:focus {
-    outline: white solid 1px;
+    outline: white solid 0.5px;
   }
 `;
 
