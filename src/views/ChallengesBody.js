@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getUserInfoWallet } from '../utils/Solana'; 
 import { fetchUserDataFromPinata } from '../utils/Pinata';
 import ThematicImage from '../widgets/ThematicImage';
@@ -9,6 +10,7 @@ import defaultProfilePic from '../assets/profile.png';
 const ChallengesBody = () => {
   const [challenges, setChallenges] = useState([]);
   const [userInfo, setUserInfo] = useState(null);
+  const navigate = useNavigate(); // Import useNavigate hook
 
   const fetchChallenges = async () => {
     try {
@@ -31,7 +33,15 @@ const ChallengesBody = () => {
 
   const handleChallengeClick = (challenge) => {
     console.log('Challenge selected:', challenge.title);
-    // Add logic for when a challenge is clicked, e.g., navigating to a detailed view
+    navigate('/completing', {
+      state: {
+        challengeType: challenge.challengeType || 'daily',
+        reward: challenge.price || 1,
+        title: challenge.title || 'Unknown Challenge',
+        description: challenge.description || 'No description available',
+        image: challenge.profilePic || defaultProfilePic,
+      },
+    });
   };
 
   return (
@@ -72,7 +82,7 @@ const ChallengesBody = () => {
                   <div className="flex items-center space-x-4">
                     <ThematicText text={challenge.loggedUsername || 'Unknown'} isActive={true} className="capitalize" />
                     <ThematicImage>
-                      <img src={defaultProfilePic} alt="Profile picture of the challenger" className="w-8 h-8 object-cover rounded-full" />
+                      <img src={challenge.profilePic || defaultProfilePic} alt="Profile picture of the challenger" className="w-8 h-8 object-cover rounded-full" />
                     </ThematicImage>
                   </div>
                 </div>
