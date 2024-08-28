@@ -1,3 +1,5 @@
+/* eslint-disable no-restricted-globals */
+
 // This is the "Offline page" service worker
 
 import { clientsClaim } from 'workbox-core';
