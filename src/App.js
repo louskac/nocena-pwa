@@ -2,10 +2,13 @@
 
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+
+import AppLayout from './components/AppLayout';
+import AddToHomeScreen from './components/AddToHomeScreen';
+
+import defaultProfilePic from './assets/profile.png';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import AppLayout from './components/AppLayout';
-import defaultProfilePic from './assets/profile.png';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -50,12 +53,29 @@ function App() {
     <Router>
       <Routes>
         {user ? (
-          <Route path="/*" element={<AppLayout user={user} handleLogout={handleLogout} />} />
+          <Route 
+            path="/*" 
+            element={
+              <>
+                <AppLayout user={user} handleLogout={handleLogout} />
+                <AddToHomeScreen /> {/* Add the button here */}
+              </>
+            } 
+          />
         ) : (
           <>
-            <Route path="/login" element={<LoginPage showRegisterPage={showRegisterPage} handleLogin={handleLogin} />} />
-            <Route path="/register" element={<RegisterPage showLoginPage={showLoginPage} handleRegister={handleRegister} />} />
-            <Route path="/*" element={<LoginPage showRegisterPage={showRegisterPage} handleLogin={handleLogin} />} />
+            <Route 
+              path="/login" 
+              element={<LoginPage showRegisterPage={showRegisterPage} handleLogin={handleLogin} />} 
+            />
+            <Route 
+              path="/register" 
+              element={<RegisterPage showLoginPage={showLoginPage} handleRegister={handleRegister} />} 
+            />
+            <Route 
+              path="/*" 
+              element={<LoginPage showRegisterPage={showRegisterPage} handleLogin={handleLogin} />} 
+            />
           </>
         )}
       </Routes>

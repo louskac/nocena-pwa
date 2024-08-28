@@ -155,22 +155,22 @@ const AppLayout = ({ user, handleLogout }) => {
           <Route path="/profile/:walletAddress" element={<OtherProfileBody />} />
         </Routes>
       </div>
-      <div className="navbar-bottom fixed bottom-0 left-0 right-0 py-4 mb-4 flex justify-around bg-primary-bg z-50 font-light">
+      <div className="navbar-bottom fixed bottom-0 left-0 right-0 py-8 flex justify-around bg-primary-bg z-50 font-light">
         <button onClick={() => handleNavClick(0)} className="text-center flex-grow text-white">
           <ThematicIcon iconName="home" isActive={currentIndex === 0} />
-          <div className="mt-1">Home</div>
+          <div className="mt-2">Home</div>
         </button>
         <button onClick={() => handleNavClick(1)} className="text-center flex-grow text-white">
           <ThematicIcon iconName="map" isActive={currentIndex === 1} />
-          <div className="mt-1">Map</div>
+          <div className="mt-2">Map</div>
         </button>
         <button onClick={() => handleNavClick(2)} className="text-center flex-grow text-white">
           <ThematicIcon iconName="challenges" isActive={currentIndex === 2} />
-          <div className="mt-1">Challenges</div>
+          <div className="mt-2">Challenges</div>
         </button>
         <button onClick={() => handleNavClick(3)} className="text-center flex-grow text-white">
           <ThematicIcon iconName="search" isActive={currentIndex === 3} />
-          <div className="mt-1">Search</div>
+          <div className="mt-2">Search</div>
         </button>
       </div>
     </div>

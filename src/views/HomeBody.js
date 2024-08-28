@@ -69,7 +69,7 @@ const HomeBody = () => {
   const rewardMapping = {
     daily: 1,
     weekly: 5,
-    monthly: 20,
+    monthly: 25,
   };
 
   const getCurrentDayChallenge = () => {
